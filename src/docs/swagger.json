@@ -1,0 +1,982 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Node",
+    "description": "Project",
+    "version": "0.1",
+    "contact": {
+      "email": "145s@ukr.net",
+      "name": "Vlad",
+      "url": "https://github.com/vladpanfilov1998"
+    }
+  },
+  "paths": {
+    "/auth/registration": {
+      "post": {
+        "description": "Registration",
+        "operationId": "registration",
+        "tags": [
+          "Auth"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "name": "firstName",
+            "in": "body",
+            "required": true,
+            "description": "Minimum 3 and maximum 25 characters",
+            "pattern": "Test"
+          },
+          {
+            "type": "string",
+            "name": "lastName",
+            "in": "body",
+            "required": true,
+            "description": "Minimum 3 and maximum 25 characters",
+            "pattern": "Test"
+          },
+          {
+            "type": "number",
+            "name": "age",
+            "in": "body",
+            "description": "Maximum age 120 years",
+            "pattern": "22"
+          },
+          {
+            "type": "string",
+            "name": "phone",
+            "in": "body",
+            "required": true,
+            "uniqueItems": true,
+            "pattern": "0123456789",
+            "description": "Phone length 10 characters"
+          },
+          {
+            "$ref": "#/definitions/emailRequest"
+          },
+          {
+            "$ref": "#/definitions/passwordRequest"
+          },
+          {
+            "type": "file",
+            "name": "avatar",
+            "in": "formData",
+            "description": "Only img format .gif, .jpeg, .pjpeg, .png, .svg+xml"
+          }
+        ],
+        "responses": {
+          "201": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "accessToken": {
+                  "$ref": "#/definitions/tokenResponse"
+                },
+                "refreshToken": {
+                  "$ref": "#/definitions/tokenResponse"
+                },
+                "userId": {
+                  "type": "number",
+                  "example": 1
+                },
+                "userEmail": {
+                  "type": "string",
+                  "example": "email@email.com"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            },
+            "description": "Bad request"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "description": "Login",
+        "operationId": "login",
+        "tags": [
+          "Auth"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/definitions/emailRequest"
+          },
+          {
+            "$ref": "#/definitions/passwordRequest"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tokenPairResponse"
+            }
+          },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            },
+            "description": "Bed request"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            },
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "description": "Logout",
+        "operationId": "logout",
+        "tags": [
+          "Auth"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/definitions/tokenRequest",
+            "description": "Access Token"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Correct Logout"
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "description": "Refresh token pair",
+        "operationId": "refresh",
+        "tags": [
+          "Auth"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/definitions/tokenRequest",
+            "description": "Refresh Token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tokenPairResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/auth/forgot": {
+      "post": {
+        "description": "Send Forgot Email",
+        "operationId": "forgotEmail",
+        "tags": [
+          "Auth"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/definitions/emailRequest"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Email successfully send"
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          }
+        }
+      },
+      "patch": {
+        "description": "Change password",
+        "operationId": "changePassword",
+        "tags": [
+          "Auth"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/definitions/passwordRequest"
+          },
+          {
+            "type": "string",
+            "name": "confirmPassword",
+            "in": "body",
+            "required": true,
+            "pattern": "Test^^^12345",
+            "description": "Confirm Password"
+          },
+          {
+            "$ref": "#/definitions/tokenRequest",
+            "description": "Action token from forgot email"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "User successfully change password"
+          },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            },
+            "description": "Bad request"
+          },
+          "401": {
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            },
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/comments/:postId": {
+      "post": {
+        "description": "Create comment",
+        "operationId": "createComment",
+        "tags": [
+          "Comment"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/definitions/tokenRequest",
+            "description": "Access token"
+          },
+          {
+            "type": "string",
+            "name": "postId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "text",
+            "in": "body",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/commentResponse"
+            },
+            "description": "OK"
+          },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            },
+            "description": "Bad request"
+          },
+          "401": {
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            },
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/comments/:userId": {
+      "get": {
+        "description": "Get all comments of user",
+        "operationId": "getComments",
+        "tags": [
+          "Comment"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "name": "userId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "array",
+              "description": "Array of comments",
+              "items": {
+                "$ref": "#/definitions/commentResponse"
+              }
+            },
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/comments/action": {
+      "patch": {
+        "description": "Set Like or Dislike",
+        "operationId": "setCommentAction",
+        "tags": [
+          "Comment"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "name": "action",
+            "in": "body",
+            "required": true,
+            "pattern": "like || dislike"
+          },
+          {
+            "type": "number",
+            "name": "commentId",
+            "in": "body",
+            "required": true,
+            "pattern": 1
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Correct Like or Dislike"
+          },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            },
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/posts": {
+      "post": {
+        "description": "Create Post",
+        "operationId": "setPost",
+        "tags": [
+          "Post"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/definitions/tokenRequest",
+            "description": "Access Token"
+          },
+          {
+            "type": "string",
+            "name": "title",
+            "in": "body",
+            "required": true,
+            "pattern": "Test"
+          },
+          {
+            "type": "string",
+            "name": "text",
+            "in": "body",
+            "required": true,
+            "pattern": "Test"
+          }
+        ],
+        "responses": {
+          "201": {
+            "schema": {
+              "$ref": "#/definitions/postResponse"
+            },
+            "description": "Created"
+          },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            },
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/posts/:userId": {
+      "get": {
+        "description": "Get Posts of User",
+        "operationId": "getPosts",
+        "tags": [
+          "Post"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "pattern": "1"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "array",
+              "description": "Array of posts",
+              "items": {
+                "$ref": "#/definitions/postResponse"
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            },
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/posts/postId": {
+      "patch": {
+        "description": "Update Post",
+        "operationId": "updatePost",
+        "tags": [
+          "Post"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/definitions/tokenRequest",
+            "description": "Access Token"
+          },
+          {
+            "type": "string",
+            "name": "title",
+            "in": "body",
+            "required": true,
+            "pattern": "Test"
+          },
+          {
+            "type": "string",
+            "in": "body",
+            "name": "text",
+            "required": true,
+            "pattern": "Test"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Correct update"
+          },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            },
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "description": "Get All Users",
+        "operationId": "getUsers",
+        "tags": [
+          "User"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "name": "page",
+            "in": "query",
+            "pattern": "1"
+          },
+          {
+            "type": "string",
+            "name": "perPage",
+            "in": "query",
+            "pattern": "1"
+          },
+          {
+            "type": "string",
+            "name": "firstName",
+            "in": "query",
+            "pattern": "Test"
+          },
+          {
+            "type": "string",
+            "name": "lastName",
+            "in": "query",
+            "pattern": "Test"
+          },
+          {
+            "type": "number",
+            "name": "age",
+            "in": "query",
+            "pattern": "22"
+          },
+          {
+            "type": "string",
+            "name": "phone",
+            "in": "query",
+            "pattern": "0123456789"
+          },
+          {
+            "type": "string",
+            "name": "email",
+            "in": "query",
+            "pattern": "mail@mail.com"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "page": {
+                  "type": "number",
+                  "example": 1
+                },
+                "perPage": {
+                  "type": "number",
+                  "example": 10
+                },
+                "totalCount": {
+                  "type": "number",
+                  "example": 100
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/userResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/:id": {
+      "delete": {
+        "description": "Delete User",
+        "operationId": "deleteUser",
+        "tags": [
+          "User"
+        ],
+        "parameters": [
+          {
+            "description": "Access Token",
+            "$ref": "#/definitions/tokenRequest"
+          },
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "pattern": "1",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Correct Delete"
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/movies": {
+      "get": {
+        "description": "Get All Movies",
+        "operationId": "getMovies",
+        "tags": [
+          "Movie"
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "example": "Test"
+                },
+                "imdb_id": {
+                  "type": "string",
+                  "example": "1214wq14"
+                },
+                "genres": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/genreResponse"
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "description": "Set Movie",
+        "operationId": "setMovie",
+        "tags": [
+          "Movie"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "name": "title",
+            "in": "body",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "imdb_id",
+            "in": "body",
+            "required": true,
+            "uniqueItems": true
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "qwetr"
+            },
+            "name": "genres",
+            "in": "body",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "example": "Test"
+                },
+                "imdb_id": {
+                  "type": "string",
+                  "example": "1214wq14"
+                },
+                "genres": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/genreResponse"
+                  }
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "400": {
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            },
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/movies/:id": {
+      "patch": {
+        "description": "Update movie",
+        "operationId": "updateMovie",
+        "tags": ["Movie"],
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "pattern": "1"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Correct Update"
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "tokenResponse": {
+      "type": "string",
+      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE1LCJ1c2VyRW1haWwiOiJ6eNGE0YbRg2N2QG1haWwuY29tIiwiaWF0IjoxNjUwMDM5MDkyLCJlsdgdhgdhfdhAwMzk5OTJ9.VQBNSWAGyqqkWxR3tyO8HeE4dPLYYTrOluqvzftNjWk",
+      "description": "Token"
+    },
+    "errorResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string",
+          "example": "Something went wrong",
+          "description": "Standard error response"
+        }
+      }
+    },
+    "commentResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "example": 1
+        },
+        "text": {
+          "type": "string",
+          "example": "qwertyuiio"
+        },
+        "authorId": {
+          "type": "number",
+          "example": 1
+        },
+        "postId": {
+          "type": "number",
+          "example": 1
+        },
+        "like": {
+          "type": "number",
+          "example": 0
+        },
+        "dislike": {
+          "type": "number",
+          "example": 0
+        },
+        "createdAt": {
+          "type": "string",
+          "example": "2022-04-15T13:11:30.000Z",
+          "description": "createdAt"
+        },
+        "deletedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "example": [
+            "2022-04-15T13:11:30.000Z",
+            null
+          ],
+          "description": "deletedAt"
+        }
+      }
+    },
+    "postResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "example": 1
+        },
+        "userId": {
+          "type": "number",
+          "example": 1
+        },
+        "title": {
+          "type": "string",
+          "example": "Test"
+        },
+        "text": {
+          "type": "string",
+          "example": "Test"
+        },
+        "comments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/commentResponse"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "example": "2022-04-15T13:11:30.000Z",
+          "description": "createdAt"
+        },
+        "deletedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "example": [
+            "2022-04-15T13:11:30.000Z",
+            null
+          ],
+          "description": "deletedAt"
+        }
+      }
+    },
+    "userResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "example": 1,
+          "description": "Id"
+        },
+        "firstName": {
+          "type": "string",
+          "example": "Test",
+          "description": "First Name"
+        },
+        "lastName": {
+          "type": "string",
+          "example": "Test",
+          "description": "Last Name"
+        },
+        "age": {
+          "type": "number",
+          "example": 1,
+          "description": "Age"
+        },
+        "phone": {
+          "type": "string",
+          "example": "0123456789",
+          "description": "Phone"
+        },
+        "email": {
+          "type": "string",
+          "example": "test@test.com",
+          "description": "Email"
+        },
+        "createdAt": {
+          "type": "string",
+          "example": "2022-04-15T13:11:30.000Z",
+          "description": "createdAt"
+        },
+        "deletedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "example": [
+            "2022-04-15T13:11:30.000Z",
+            null
+          ],
+          "description": "deletedAt"
+        }
+      }
+    },
+    "tokenPairResponse": {
+      "type": "object",
+      "properties": {
+        "accessToken": {
+          "$ref": "#/definitions/tokenResponse"
+        },
+        "refreshToken": {
+          "$ref": "#/definitions/tokenResponse"
+        },
+        "user": {
+          "$ref": "#/definitions/userResponse"
+        }
+      }
+    },
+    "genreResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "qrsdgssd124"
+        },
+        "name": {
+          "type": "string",
+          "example": "Action"
+        }
+      }
+    },
+    "tokenRequest": {
+      "type": "string",
+      "name": "Authorization",
+      "in": "header",
+      "required": true,
+      "pattern": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE1LCJ1c2VyRW1haWwiOiJ6eNGE0YbRg2N2QG1haWwuY29tIiwiaWF0IjoxNjUwMDM5MDkyLCJlsdgdhgdhfdhAwMzk5OTJ9.VQBNSWAGyqqkWxR3tyO8HeE4dPLYYTrOluqvzftNjWk"
+    },
+    "emailRequest": {
+      "type": "string",
+      "name": "email",
+      "in": "body",
+      "required": true,
+      "uniqueItems": true,
+      "pattern": "email@email.com"
+    },
+    "passwordRequest": {
+      "type": "string",
+      "name": "password",
+      "in": "body",
+      "required": true,
+      "pattern": "Test^^^12345",
+      "description": "Minimum eight and maximum 25 characters, at least one uppercase letter, one lowercase letter, one number and one special character"
+    }
+  }
+}
